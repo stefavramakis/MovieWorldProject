@@ -21,7 +21,8 @@
                     <div class="d-flex flex-column align-items-center mb-3">
                         <span class="text-center mb-2" style="font-size: 0.8rem!important">
                         Welcome Back
-                        <a href="{{ route('movies.index', ['user' => auth()->id()]) }}" style="color: #00acee; text-decoration: none;">
+                        <a href="{{ route('movies.index', ['user' => auth()->id()]) }}"
+                           style="color: #00acee; text-decoration: none;">
                             {{ auth()->user()->name }}
                         </a>
                         </span>
@@ -35,41 +36,46 @@
                 @endauth
             </div>
             <div class="flex justify-content-between mb-3">
-                <div class="w-75" style="height: 700px; overflow-y: scroll;">
-                    @foreach ($movies as $movie)
-                        @php
-                            $userVote = $movie->votes->firstWhere('user_id', auth()->id());
-                            $hasLiked = $userVote && $userVote->type === 'like';
-                            $hasHated = $userVote && $userVote->type === 'hate';
-                        @endphp
-                        <div class="border border-2 rounded-4 p-3 mb-4" style="max-width: 600px; font-family: Arial, sans-serif;">
-                            <!-- Top bar -->
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                <strong>{{ $movie->title }}</strong>
-                                <span style="font-size: 0.9em;">
+                @if(!empty($movies->toArray()))
+                    <div class="w-75" style="height: 700px; overflow-y: scroll;">
+                        @foreach ($movies as $movie)
+                            @php
+                                $userVote = $movie->votes->firstWhere('user_id', auth()->id());
+                                $hasLiked = $userVote && $userVote->type === 'like';
+                                $hasHated = $userVote && $userVote->type === 'hate';
+                            @endphp
+                            <div class="border border-2 rounded-4 p-3 mb-4"
+                                 style="max-width: 600px; font-family: Arial, sans-serif;">
+                                <!-- Top bar -->
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <strong>{{ $movie->title }}</strong>
+                                    <span style="font-size: 0.9em;">
                                     Posted {{ $movie->created_at->format('d/m/Y') }}
                                 </span>
-                            </div>
-
-                            <!-- Description -->
-                            <div style="margin-bottom: 15px;" class="w-100">
-                                <p style="font-size: 0.95em; color: #333; word-wrap: break-word; overflow-wrap: break-word;">
-                                    {{ $movie->description }}
-                                </p>
-                            </div>
-
-                            <!-- Bottom bar -->
-                            <div class="d-flex justify-content-between align-items-center" style="font-size: 0.9em;">
-                                <div>
-                                    <span style="color: {{ $hasLiked ? '#1cc741' : '#000000' }};">{{ $movie->getLikesCount() }} likes</span> | <span style="color: {{ $hasHated ? '#fc0a0a' : '#000000' }};">{{ $movie->getHatesCount() }} hates</span>
                                 </div>
-                                <div>
-`                                    @if(auth()->check() && auth()->id() !== $movie->user_id)
-                                        <form action="{{ route('movies.react', ['movie' => $movie->id, 'type' => 'like']) }}"
-                                              method="POST" style="display:inline;">
-                                            @csrf
-                                            <button type="submit"
-                                                    style="
+
+                                <!-- Description -->
+                                <div style="margin-bottom: 15px;" class="w-100">
+                                    <p style="font-size: 0.95em; color: #333; word-wrap: break-word; overflow-wrap: break-word;">
+                                        {{ $movie->description }}
+                                    </p>
+                                </div>
+
+                                <!-- Bottom bar -->
+                                <div class="d-flex justify-content-between align-items-center"
+                                     style="font-size: 0.9em;">
+                                    <div>
+                                        <span style="color: {{ $hasLiked ? '#1cc741' : '#000000' }};">{{ $movie->getLikesCount() }} likes</span>
+                                        | <span style="color: {{ $hasHated ? '#fc0a0a' : '#000000' }};">{{ $movie->getHatesCount() }} hates</span>
+                                    </div>
+                                    <div>
+                                        ` @if(auth()->check() && auth()->id() !== $movie->user_id)
+                                            <form
+                                                action="{{ route('movies.react', ['movie' => $movie->id, 'type' => 'like']) }}"
+                                                method="POST" style="display:inline;">
+                                                @csrf
+                                                <button type="submit"
+                                                        style="
                                                         cursor: pointer;
                                                         color: {{ $hasLiked ? '#fff' : '#00acee' }};
                                                         background: {{ $hasLiked ? '#00acee' : 'none' }};
@@ -78,15 +84,16 @@
                                                         padding: 4px 12px;
                                                         transition: all 0.2s ease-in-out;
                                                     ">
-                                                Like
-                                            </button>
-                                        </form>
-                                        |
-                                        <form action="{{ route('movies.react', ['movie' => $movie->id, 'type' => 'hate']) }}"
-                                              method="POST" style="display:inline;">
-                                            @csrf
-                                            <button type="submit"
-                                                    style="
+                                                    Like
+                                                </button>
+                                            </form>
+                                            |
+                                            <form
+                                                action="{{ route('movies.react', ['movie' => $movie->id, 'type' => 'hate']) }}"
+                                                method="POST" style="display:inline;">
+                                                @csrf
+                                                <button type="submit"
+                                                        style="
                                                         cursor: pointer;
                                                         color: {{ $hasHated ? '#fff' : '#00acee' }};
                                                         background: {{ $hasHated ? '#00acee' : 'none' }};
@@ -95,32 +102,34 @@
                                                         padding: 4px 12px;
                                                         transition: all 0.2s ease-in-out;
                                                     ">
-                                                Hate
-                                            </button>
-                                        </form>
-                                    @endif
-                                </div>
-                                <div style="font-size: 0.8em;">
-                                    Posted by
-                                    <span style="color: #00acee;">
-                                    @if(auth()->check() && auth()->id() === $movie->user_id)
-                                            You
-                                        @else
-                                            {{ $movie->user->name  }}
+                                                    Hate
+                                                </button>
+                                            </form>
                                         @endif
+                                    </div>
+                                    <div style="font-size: 0.8em;">
+                                        Posted by
+                                        <span style="color: #00acee;">
+                                    @if(auth()->check() && auth()->id() === $movie->user_id)
+                                                You
+                                            @else
+                                                {{ $movie->user->name  }}
+                                            @endif
                                         </span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    @endforeach
-                </div>
+                        @endforeach
+                    </div>
+                @endif
                 <div>
                     @auth
                         <div class="mb-2">
                             <a href="{{ route('movies.create') }}" class="btn btn-success">New Movie</a>
                         </div>
                     @endauth
-                        <div class="align-items-center border border-4 border-black d-flex flex-column rounded-4 p-3">
+                    @if(!empty($movies->toArray()))
+                        <div class="align-items-center border-4 border-black d-flex flex-column rounded-4 p-3">
                             <p class="mb-2 fw-bold">Sort by:</p>
                             <div class="d-flex flex-column align-items-start gap-2 w-100">
                                 {{-- Likes --}}
@@ -166,6 +175,7 @@
                                 </a>
                             </div>
                         </div>
+                    @endif
                 </div>
             </div>
 
